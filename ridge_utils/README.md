@@ -1,0 +1,1 @@
+Thanks to HuthLab: https://github.com/HuthLab/encoding-model-scaling-laws/tree/main
