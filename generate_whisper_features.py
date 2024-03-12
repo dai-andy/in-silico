@@ -4,7 +4,7 @@
 Feature extraction for ASR models supported by Hugging Face.
 
 Example usage:
-python3 ./extract_speech_features.py --stimulus_dir story_audio --model whisper-tiny --chunksz 100 --contextsz 16000 --use_featext --batchsz 64
+python3 ./generate_whisper_features.py --stimulus_dir story_audio --model whisper-tiny --chunksz 100 --contextsz 16000 --use_featext --batchsz 64
 """
 
 import argparse
@@ -283,6 +283,9 @@ if __name__ == "__main__":
     parser.add_argument('--stimulus_dir', type=Path,
                         default='./processed_stimuli/',
                         help="Directory with preprocessed stimuli wav's.")
+    parser.add_argument('--save_dir', type=Path,
+                        default='.',
+                        help="Directory where features will get saved.")
     parser.add_argument('--model', type=str, required=True)
     parser.add_argument('--use_featext', action='store_true')
     parser.add_argument('--batchsz', type=int, default=1,
@@ -404,7 +407,7 @@ if __name__ == "__main__":
     assert (args.contextsz % args.chunksz) == 0, "These must be divisible"
     contextsz_sec = args.contextsz / 1000.
 
-    model_save_path = f"features_cnk{chunksz_sec:0.1f}_ctx{contextsz_sec:0.1f}/{model_name}"
+    model_save_path = os.path.join(args.save_dir, f"features_cnk{chunksz_sec:0.1f}_ctx{contextsz_sec:0.1f}", model_name)
     if args.stride:
         # If using a custom stride length (e.g. for snippets), store in a
         # separate directory.
