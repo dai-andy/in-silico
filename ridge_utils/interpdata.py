@@ -3,6 +3,12 @@ import logging
 
 logger = logging.getLogger("text.regression.interpdata")
 
+def simulate(ntrs, offset=0, expectedtr=2.0):
+    """Simulates [ntrs] TRs that occur at the expected TR.
+    """
+    trtimes = list(np.arange(ntrs)*expectedtr + offset)
+    return trtimes
+
 def interpdata(data, oldtime, newtime):
     """Interpolates the columns of [data] to find the values at [newtime], given that the current
     values are at [oldtime].  [oldtime] must have the same number of elements as [data] has rows.

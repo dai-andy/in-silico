@@ -386,3 +386,44 @@ def save_table_file(filename, filedict):
         hf.createArray("/", vname, var)
     hf.close()
 
+def spe_and_cc_norm(orig_data, data_pred, data_norm=True, max_flooring=None):
+    '''
+    Computes the signal power explained and the cc_norm of a model given the observed and predicted values
+    Assumes normalization unless data_norm is set to False
+
+    orig_data: 3D numpy array (trials, timepoints, voxels)
+
+    data_pred: 2D numpy array (timepoints, voxels)
+
+    data_norm: bool -> Set to False if not pre-normalized
+
+    max_flooring: None/float (0-1) -> If not None, compute cc_norm in an alternate way that floors cc_max by max_flooring.
+    This is helpful to clean up bad voxels that are not at all language selective.
+
+    According to Schoppe: https://www.frontiersin.org/articles/10.3389/fncom.2016.00010/full
+    '''
+    y = np.mean(orig_data, axis=0)
+    num_trials = len(orig_data)
+    if not data_norm:
+        variance_across_time = np.var(orig_data, axis=1, ddof=1)
+        TP = np.mean(variance_across_time, axis=0)
+    else:
+        TP = np.zeros(orig_data.shape[2]) + 1
+    SP = (1 / (num_trials-1)) * ((num_trials * np.var(y, axis=0, ddof=1)) - TP)
+    SPE_num = (np.var(y, axis=0, ddof=1) - np.var(y - data_pred, axis=0, ddof=1))
+    SPE = (np.var(y, axis=0, ddof=1) - np.var(y - data_pred, axis=0, ddof=1)) / SP
+    y_flip = np.swapaxes(y, axis1=0, axis2=1)
+    data_flip = np.swapaxes(data_pred, axis1=0, axis2=1)
+    covs = np.zeros(y_flip.shape[0])
+    for i, row in enumerate(y_flip):
+        covs[i] = np.cov(y_flip[i], data_flip[i])[0][1]
+    cc_norm =  np.sqrt(1/SP) * (covs / np.sqrt(np.var(data_pred, axis=0, ddof=1)))
+    cc_max = None
+    if max_flooring is not None:
+        cc_max = np.nan_to_num(1 / (np.sqrt(1 + ((1/num_trials) * ((TP/SP)-1)))))
+        #cc_max = np.maximum(cc_max, np.zeros(cc_max.shape) + max_flooring)
+        corrs = np.zeros(y_flip.shape[0])
+        for i, row in enumerate(y_flip):
+            corrs[i] = np.corrcoef(y_flip[i], data_flip[i])[0][1]
+        cc_norm = corrs / cc_max
+    return SPE, cc_norm, cc_max, corrs
