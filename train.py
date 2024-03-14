@@ -25,23 +25,30 @@ train_bert    = torch.cat([bert[i] for i in train_indices])
 val_whisper   = torch.cat([whisper[i] for i in val_indices])
 val_bert      = torch.cat([bert[i] for i in val_indices])
 
+train_whisper = train_whisper
+train_bert = train_bert
+
 train_dataset = TensorDataset(train_whisper, train_bert)
 val_dataset = TensorDataset(val_whisper, val_bert)
+print("train dataset size:", len(train_dataset))
+print("val dataset size:", len(val_dataset))
 
-train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=128, shuffle=True)
+batch_size = 512
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
-# decoder = LinearDecoder(train_whisper.shape[-1], train_bert.shape[-1]).cuda().float()
-decoder = MLPDecoder(train_whisper.shape[-1], train_bert.shape[-1], 2).cuda().float()
+decoder = LinearDecoder(train_whisper.shape[-1], train_bert.shape[-1]).cuda().float()
+# decoder = MLPDecoder(train_whisper.shape[-1], train_bert.shape[-1], 2).cuda().float()
 loss_fn = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(decoder.parameters())
 
 fig, ax = plt.subplots()
 losses = []
 val_losses = []
-num_epochs = 3
+num_epochs = 40
 for epoch in tqdm(range(num_epochs)):
-    for i, (x, y) in tqdm(enumerate(train_loader)):
+    for i, (x, y) in enumerate(train_loader):
+        batch_num = epoch * len(train_loader) + i
         decoder.train()
         optimizer.zero_grad()
 
@@ -50,21 +57,21 @@ for epoch in tqdm(range(num_epochs)):
         y_pred = decoder(x)
         loss = loss_fn(y_pred, y)
         loss.backward()
-        print(loss.item())
-        losses.append((i, loss.item()))
+        losses.append((batch_num, loss.item()))
 
         optimizer.step()
 
         if i % 8 == 0:
             decoder.eval()
             batch_val_losses = []
-            for x, y in tqdm(val_loader):
+            for x, y in val_loader:
                 x = x.cuda().float()
                 y = y.cuda().float()
                 y_pred = decoder(x)
                 val_loss = loss_fn(y_pred, y)
                 batch_val_losses.append(val_loss.item())
-            val_losses.append((i, torch.tensor(batch_val_losses).mean().item()))
+            val_losses.append((batch_num, torch.tensor(batch_val_losses).mean().item()))
+    print(f"epoch {epoch} val loss: {val_loss.item()}")
 
 ax.plot(*zip(*losses), color="blue")
 ax.plot(*zip(*val_losses), color="red")
