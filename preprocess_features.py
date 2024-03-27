@@ -8,7 +8,6 @@ import torch
 import joblib
 from tqdm import tqdm
 
-
 data_dir = "/nlp/scr/quevedo"
 real_features_dir = "features_cnk0.1_ctx16.0"
 anth_features_dir = "anth_features_cnk0.1_ctx16.0"
@@ -19,7 +18,6 @@ fmri_file = "UTS03_responses.jbl"
 story2fmri_file = "synth_training_story2fmri.pkl"
 story2whisper_file = "synth_training_story2whisper.pkl"
 story2snippets_file = "synth_training_story2snippets.pkl"
-
 
 def get_interpolated_snippets(features, sincmat, all_snippets):
     i, j = sincmat.nonzero()
@@ -36,7 +34,6 @@ def get_interpolated_snippets(features, sincmat, all_snippets):
 with open(os.path.join(data_dir, wordseqs_file), "rb") as f:
     wordseqs = pickle.load(f)
 fmri = joblib.load(os.path.join(data_dir, fmri_file))
-
 
 story2fmri = {}
 # mapping from stories to features
