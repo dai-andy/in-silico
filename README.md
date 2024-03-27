@@ -1,5 +1,6 @@
 # in-silico
-Repository for 'in-silico: Training Neural Decoder on Synthetic Neural Data'
+Repository for ['in-silico: Training Neural Decoders on Synthetic Neural Data'](https://drive.google.com/file/d/1PNq_BIZNZ-sPpBlAzSdO5lzaxgxsryHY/view?usp=sharing)
+
 
 Special thanks to Huth Lab: https://github.com/HuthLab/encoding-model-scaling-laws/tree/main
 
