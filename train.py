@@ -28,6 +28,7 @@ real_features_dir = "features_cnk0.1_ctx16.0"
 anth_features_dir = "anth_features_cnk0.1_ctx16.0"
 libasr_features_dir = "libasr_features_cnk0.1_ctx16.0"
 
+# get names of audio files
 anth_story_names = [
         ent.replace('.npz', '') for ent in os.listdir(os.path.join(data_dir, anth_features_dir, whisper_model, 'encoder.0'))]
 lib_story_names = [
